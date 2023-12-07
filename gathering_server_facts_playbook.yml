@@ -1,0 +1,43 @@
+---
+# ansible v2.15
+- name: Write server facts report into a csv file
+  hosts: all
+  gather_facts: yes
+  become: true
+
+  vars:
+    output_path: "reports"
+    filename: "server_report_{{ date }}.csv"
+
+  tasks:
+  - name: CSV - Generate output filename
+    set_fact: date="{{lookup('pipe','date +%Y%m%d')}}"
+    run_once: true
+
+  - name: CSV - Create file and set the header
+    lineinfile:
+      path: "{{ output_path }}/{{ filename }}"
+      line:
+        hostname,ipaddr,OS,OS_Version,Kernel,bios_version
+      create: yes
+      state: present
+    delegate_to: localhost
+    
+  - name: CSV - Get Server Metadata
+    set_fact:
+      csv_tmp: >
+        {{ ansible_hostname }}, {{ ansible_all_ipv4_addresses }}, {{ ansible_distribution_file_variety }}, {{ ansible_distribution_version }}, {{ ansible_kernel }}, {{ ansible_bios_version }}
+
+  - name: Write Server Information into csv file
+    lineinfile:
+      path: "{{ output_path }}/{{ filename }}"
+      line: "{{ csv_tmp }}"
+      create: yes
+    delegate_to: localhost
+
+  - name: CSV - Blank lines removal
+    lineinfile:
+      path: "./{{ output_path }}/{{ filename }}"
+      state: absent
+      regex: '^\s*$'
+    delegate_to: localhost
