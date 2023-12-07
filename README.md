@@ -6,7 +6,7 @@ This playbook inspired by [Ansible export facts to simple csv file]. This works 
 This script does following:
 
 * Generate CSV filename using date
-* Put in a header int the output file
+* Put in a header into the output file
 * Get facts from remote server and write it to a temporary file called csv_tmp
 * Write data into the final export file in controller node
 * Remove blank lines from csv
